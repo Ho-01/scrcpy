@@ -42,6 +42,8 @@ struct sc_screen {
 
     struct sc_controller *controller;
 
+    bool grayscale;
+
     struct sc_screen_bg_color {
         uint8_t r;
         uint8_t g;
@@ -75,6 +77,7 @@ struct sc_screen {
 #endif
 
     enum sc_render_fit render_fit;
+    bool grayscale;
 
     struct sc_size frame_size;
     struct sc_size content_size; // rotated frame_size
