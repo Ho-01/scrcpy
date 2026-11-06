@@ -42,8 +42,6 @@ struct sc_screen {
 
     struct sc_controller *controller;
 
-    bool grayscale;
-
     struct sc_screen_bg_color {
         uint8_t r;
         uint8_t g;
