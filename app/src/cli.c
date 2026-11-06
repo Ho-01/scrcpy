@@ -112,6 +112,7 @@ enum {
     OPT_IGNORE_VIDEO_ENCODER_CONSTRAINTS,
     OPT_NO_TERMINAL_TITLE,
     OPT_HWDEC,
+    OPT_GRAYSCALE,
 };
 
 struct sc_option {
@@ -830,6 +831,13 @@ static const struct sc_option options[] = {
                 "Supported names are currently \"direct3d\", \"opengl\", "
                 "\"opengles2\", \"opengles\", \"metal\" and \"software\".\n"
                 "<https://wiki.libsdl.org/SDL_HINT_RENDER_DRIVER>",
+    },
+    {
+        .longopt_id = OPT_GRAYSCALE,
+        .longopt = "grayscale",
+        .text = "Display the mirrored video in grayscale on the computer. "
+                "The Android device and recorded files remain in color. "
+                "This option disables hardware video decoding.",
     },
     {
         .longopt_id = OPT_RENDER_FIT,
@@ -2990,6 +2998,9 @@ parse_args_with_getopt(struct scrcpy_cli_args *args, int argc, char *argv[],
                 if (!parse_hex_color(optarg, &opts->background_color)) {
                     return false;
                 }
+                break;
+            case OPT_GRAYSCALE:
+                opts->grayscale = true;
                 break;
             case OPT_RENDER_FIT:
                 if (!parse_render_fit(optarg, &opts->render_fit)) {

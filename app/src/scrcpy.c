@@ -382,6 +382,12 @@ scrcpy(struct scrcpy_options *options) {
 #endif
     struct scrcpy *s = &scrcpy;
 
+    // Grayscale operates on software-decoded YUV planes only.
+    if (options->grayscale && options->hwdec_mode != SC_HWDEC_MODE_DISABLED) {
+        LOGI("Grayscale enabled: disabling hardware video decoding");
+        options->hwdec_mode = SC_HWDEC_MODE_DISABLED;
+    }
+
     // Minimal SDL initialization
     if (!SDL_Init(SDL_INIT_EVENTS)) {
         LOGE("Could not initialize SDL: %s", SDL_GetError());
@@ -836,6 +842,7 @@ aoa_complete:
             .window_aspect_ratio_lock = options->window_aspect_ratio_lock,
             .window_borderless = options->window_borderless,
             .render_fit = options->render_fit,
+            .grayscale = options->grayscale,
             .orientation = options->display_orientation,
             .mipmaps = options->mipmaps,
             .hwdec_mode = options->hwdec_mode,

@@ -306,6 +306,7 @@ struct scrcpy_options {
     enum sc_orientation record_orientation;
     enum sc_display_ime_policy display_ime_policy;
     enum sc_render_fit render_fit;
+    bool grayscale; // desaturate only the local mirrored window
     int16_t window_x; // SC_WINDOW_POSITION_UNDEFINED for "auto"
     int16_t window_y; // SC_WINDOW_POSITION_UNDEFINED for "auto"
     uint16_t window_width;
