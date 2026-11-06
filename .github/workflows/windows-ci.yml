@@ -1,0 +1,51 @@
+name: Windows x64 CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows-x64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Windows cross-compilation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build nasm \
+            mingw-w64 mingw-w64-tools libz-mingw-w64-dev
+
+      - name: Build Windows x64 client and dependencies
+        run: release/build_windows.sh 64
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: '17'
+
+      - name: Build Android server
+        run: release/build_server.sh
+
+      - name: Assemble portable ZIP
+        run: |
+          cp release/work/build-server/server/scrcpy-server \
+            release/work/build-win64/dist/scrcpy-server
+          cd release/work/build-win64/dist
+          zip -r "${GITHUB_WORKSPACE}/scrcpy-windows-x64-grayscale.zip" .
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v7
+        with:
+          name: scrcpy-windows-x64-grayscale
+          path: scrcpy-windows-x64-grayscale.zip
+          if-no-files-found: error
