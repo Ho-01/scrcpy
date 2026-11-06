@@ -144,6 +144,7 @@ struct sc_screen_params {
     bool window_borderless;
 
     enum sc_render_fit render_fit;
+    bool grayscale;
     enum sc_orientation orientation;
     bool mipmaps;
 
