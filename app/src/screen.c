@@ -531,6 +531,7 @@ sc_screen_init(struct sc_screen *screen,
     screen->camera = params->camera;
     screen->window_aspect_ratio_lock = params->window_aspect_ratio_lock;
     screen->render_fit = params->render_fit;
+    screen->grayscale = params->grayscale;
     screen->flex_display = params->flex_display;
 
     screen->bg.r = (params->background_color >> 16) & 0xFF;
@@ -980,6 +981,29 @@ sc_screen_apply_frame(struct sc_screen *screen, bool can_resize) {
 
         set_content_size(screen, new_content_size, can_resize);
         sc_screen_update_content_rect(screen);
+    }
+
+    if (screen->grayscale) {
+        // YUV 4:2:0: neutral chroma (Cb = Cr = 128) produces grayscale
+        // without altering the luma plane. Only the display frame is changed;
+        // upstream frames and packet-based recordings retain their colors.
+        if (frame->format != AV_PIX_FMT_YUV420P
+                && frame->format != AV_PIX_FMT_YUVJ420P) {
+            LOGE("Grayscale requires a software-decoded YUV420P frame");
+            return false;
+        }
+        if (av_frame_make_writable(frame) < 0) {
+            LOGE("Could not make the display frame writable");
+            return false;
+        }
+        int chroma_width = (frame->width + 1) / 2;
+        int chroma_height = (frame->height + 1) / 2;
+        for (int plane = 1; plane <= 2; ++plane) {
+            for (int y = 0; y < chroma_height; ++y) {
+                memset(frame->data[plane] + y * frame->linesize[plane],
+                       128, chroma_width);
+            }
+        }
     }
 
     bool ok = sc_texture_update(&screen->tex, frame);
